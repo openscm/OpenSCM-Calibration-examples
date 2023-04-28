@@ -5,15 +5,18 @@ description = "Examples using OpenSCM-Calibration"
 authors = ["Zebedee Nicholls <zebedee.nicholls@climate-energy-college.org>"]
 license = "BSD 3-Clause"
 readme = "README.md"
-packages = [{include = "openscm_calibration_examples"}]
 
 [tool.poetry.dependencies]
 python = "^3.9"
 openscm-calibration = { version = "^0.5.0", extras = ["notebooks", "plots"] }
-jupytext = "^1.14.5"
 
 [tool.poetry.group.docs.dependencies]
 jupyter-book = "^0.15.1"
+jupytext = "^1.14.5"
+
+[tool.poetry.group.dev.dependencies]
+blacken-docs = { git = "https://github.com/znicholls/blacken-docs.git", rev = "8dd86f" }
+tokenize-rt = "^5.0.0"
 
 [build-system]
 requires = ["poetry-core"]

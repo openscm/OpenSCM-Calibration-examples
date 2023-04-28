@@ -110,7 +110,7 @@ def do_experiments_full(
 
     beta
         Damping constant [kg / s]
-        
+
     m
         Mass [kg]
 
@@ -483,7 +483,7 @@ Again, we have to define where to start the optimisation (this has a greater eff
 ```{code-cell} ipython3
 # The typical way to do local optimisation is to polish
 # the results of a more global optimisation like differential
-# evolution above. We do that here, but you could also use a 
+# evolution above. We do that here, but you could also use a
 # random start too
 start_local = optimize_res.x
 start_local
@@ -613,7 +613,7 @@ Next we create a function which returns the sum of the negative log of the likel
 
 ```{code-cell} ipython3
 def neg_log_likelihood_plus_prior_full(
-    x, 
+    x,
     neg_log_prior: Callable[[np.array], float],
     model_runner: OptModelRunner,
     cost_calculator: OptCostCalculatorSSE,
@@ -634,7 +634,12 @@ def neg_log_likelihood_plus_prior_full(
     return neg_ll_x + neg_log_prior_x, neg_log_prior_x, neg_ll_x
 
 
-neg_log_likelihood_plus_prior = partial(neg_log_likelihood_plus_prior_full, neg_log_prior=neg_log_prior, model_runner=model_runner, cost_calculator=cost_calculator)
+neg_log_likelihood_plus_prior = partial(
+    neg_log_likelihood_plus_prior_full,
+    neg_log_prior=neg_log_prior,
+    model_runner=model_runner,
+    cost_calculator=cost_calculator,
+)
 ```
 
 ### Proposal
@@ -957,6 +962,7 @@ print("parameters")
 display(parameters_incl_mass)
 parameter_order_incl_mass = [v[0] for v in parameters_incl_mass]
 
+
 def do_model_runs_input_generator_incl_mass(
     k: pint.Quantity, x_zero: pint.Quantity, beta: pint.Quantity, m: pint.Quantity
 ) -> Dict[str, pint.Quantity]:
@@ -973,8 +979,8 @@ def do_model_runs_input_generator_incl_mass(
 
     beta
         beta
-        
-    m 
+
+    m
         Mass
 
     Returns
@@ -993,7 +999,9 @@ print("Model runner")
 display(model_runner_incl_mass)
 
 print("Example cost")
-display(cost_calculator.calculate_cost(model_runner_incl_mass.run_model([3, 0.5, 3, 10])))
+display(
+    cost_calculator.calculate_cost(model_runner_incl_mass.run_model([3, 0.5, 3, 10]))
+)
 
 bounds_dict_incl_mass = {
     "k": [
@@ -1011,18 +1019,22 @@ bounds_dict_incl_mass = {
     "m": [
         UREG.Quantity(10, "Pt"),
         UREG.Quantity(1000, "Pt"),
-    ]
+    ],
 }
 print("Bounds dictionary")
 display(bounds_dict_incl_mass)
 
-bounds_incl_mass = [[v.to(unit).m for v in bounds_dict_incl_mass[k]] for k, unit in parameters_incl_mass]
-neg_log_prior_incl_mass = partial(neg_log_prior_bounds, bounds=np.array(bounds_incl_mass))
+bounds_incl_mass = [
+    [v.to(unit).m for v in bounds_dict_incl_mass[k]] for k, unit in parameters_incl_mass
+]
+neg_log_prior_incl_mass = partial(
+    neg_log_prior_bounds, bounds=np.array(bounds_incl_mass)
+)
 
 neg_log_likelihood_plus_prior_incl_mass = partial(
-    neg_log_likelihood_plus_prior_full, 
-    neg_log_prior=neg_log_prior_incl_mass, 
-    model_runner=model_runner_incl_mass, 
+    neg_log_likelihood_plus_prior_full,
+    neg_log_prior=neg_log_prior_incl_mass,
+    model_runner=model_runner_incl_mass,
     cost_calculator=cost_calculator,
 )
 
@@ -1031,7 +1043,9 @@ ndim_incl_mass = len(bounds_incl_mass)
 nwalkers_incl_mass = 5 * ndim_incl_mass
 
 start_emcee_incl_mass = [4, 1.2, 20, 100]
-start_emcee_incl_mass = [s + s / 10 * np.random.rand(nwalkers_incl_mass) for s in start_emcee_incl_mass]
+start_emcee_incl_mass = [
+    s + s / 10 * np.random.rand(nwalkers_incl_mass) for s in start_emcee_incl_mass
+]
 start_emcee_incl_mass = np.vstack(start_emcee_incl_mass).T
 
 move_incl_mass = DIMEMove()
