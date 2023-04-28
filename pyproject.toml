@@ -17,6 +17,10 @@ nbmake = "^1.4.1"
 pytest = "^7.3.1"
 pytest-xdist = "^3.2.1"
 
+
+[tool.poetry.group.docs.dependencies]
+jupyter-book = "^0.15.1"
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
