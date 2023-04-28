@@ -5,7 +5,7 @@ on:
     branches:
       - main
   schedule:
-    # Run cron job every month, https://crontab.guru/every-month
+    # Run cron job every week
     - cron: '0 0 * * 3'
   workflow_dispatch:
 
