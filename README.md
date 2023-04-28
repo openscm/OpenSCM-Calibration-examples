@@ -5,8 +5,7 @@ Long-running examples using OpenSCM-Calibration
 To do:
 
 - tidy up the below
-- add https://jupyterbook.org/en/stable/publish/gh-pages.html#automatically-host-your-book-with-github-actions
-- Makefile/install instructionss
+- Makefile/install/run instructionss
 
 ## Development
 
