@@ -27,6 +27,7 @@ import emcee
 import matplotlib.pyplot as plt
 import more_itertools
 import numpy as np
+import numpy.testing as npt
 import pandas as pd
 import pint
 import scipy.integrate
@@ -460,6 +461,17 @@ plt.close()
 optimize_res
 ```
 
+```{code-cell} ipython3
+---
+mystnb:
+  code_prompt_hide: Hide the assertion we use in testing
+  code_prompt_show: Show the assertion we use in testing
+tags: [hide-cell]
+---
+assert optimize_res.success
+npt.assert_allclose(optimize_res.x, [3.030, 0.469, 3.108], rtol=1e-3)
+```
+
 ## Local optimisation
 
 Scipy also has [local optimisation](https://docs.scipy.org/doc/scipy/reference/optimize.html#local-multivariate-optimization) (e.g. Nelder-Mead) options. Here we show how to do this.
@@ -548,6 +560,17 @@ with tqdm(total=max_n_runs) as pbar:
 
 plt.close()
 optimize_res_local
+```
+
+```{code-cell} ipython3
+---
+mystnb:
+  code_prompt_hide: Hide the assertion we use in testing
+  code_prompt_show: Show the assertion we use in testing
+tags: [hide-cell]
+---
+assert optimize_res_local.success
+npt.assert_allclose(optimize_res_local.x, [2.988, 0.500, 3.156], rtol=1e-3)
 ```
 
 ## MCMC
@@ -790,6 +813,16 @@ for _ in range(4):
     plt.close()
 ```
 
+```{code-cell} ipython3
+---
+mystnb:
+  code_prompt_hide: Hide the assertion we use in testing
+  code_prompt_show: Show the assertion we use in testing
+tags: [hide-cell]
+---
+assert autocorr_bits["converged"]
+```
+
 In this case, our MCMC converges nicely (although convergence is of course not an exact science).
 
 +++
@@ -990,7 +1023,7 @@ backend_incl_mass.reset(nwalkers_incl_mass, ndim_incl_mass)
 ```{code-cell} ipython3
 processes = 4
 
-max_iterations = 750
+max_iterations = 900
 burnin = 100
 thin = 15
 
