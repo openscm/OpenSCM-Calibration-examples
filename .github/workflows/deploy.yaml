@@ -44,9 +44,8 @@ jobs:
         run: |
           poetry run jupyter-book build book
       - name: GitHub Pages action
-        uses: peaceiris/actions-gh-pages@v3.6.1
+        uses: peaceiris/actions-gh-pages@v3.9.3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: book/_build/html
           publish_branch: gh-pages
-          enable_jekyll: false
