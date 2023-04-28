@@ -577,6 +577,12 @@ npt.assert_allclose(optimize_res_local.x, [2.988, 0.500, 3.156], rtol=1e-3)
 
 To run MCMC, we use the [emcee](https://emcee.readthedocs.io/) package. This has heaps of options for running MCMC and is really user friendly. All the different available moves/samplers are listed [here](https://emcee.readthedocs.io/en/stable/user/moves/).
 
++++
+
+### Prior
+
+For MCMC, we need the prior too.
+
 ```{code-cell} ipython3
 def neg_log_prior_bounds(x: np.ndarray, bounds: np.ndarray) -> float:
     """
@@ -601,16 +607,20 @@ def neg_log_prior_bounds(x: np.ndarray, bounds: np.ndarray) -> float:
 neg_log_prior = partial(neg_log_prior_bounds, bounds=np.array(bounds))
 ```
 
+### Likelihood and prior
+
+Next we create a function which returns the sum of the negative log of the likelihood and the prior for a given parameter sample.
+
 ```{code-cell} ipython3
-def log_prob_full(
+def neg_log_likelihood_plus_prior_full(
     x, 
     neg_log_prior: Callable[[np.array], float],
     model_runner: OptModelRunner,
     cost_calculator: OptCostCalculatorSSE,
 ) -> Tuple[float, float, float]:
-    neg_ll_prior_x = neg_log_prior(x)
+    neg_log_prior_x = neg_log_prior(x)
 
-    if not np.isfinite(neg_ll_prior_x):
+    if not np.isfinite(neg_log_prior_x):
         return -np.inf, None, None
 
     try:
@@ -620,13 +630,18 @@ def log_prob_full(
 
     sses = cost_calculator.calculate_cost(model_results)
     neg_ll_x = -sses / 2
-    ll = neg_ll_x + neg_ll_prior_x
 
-    return ll, neg_ll_prior_x, neg_ll_x
+    return neg_ll_x + neg_log_prior_x, neg_log_prior_x, neg_ll_x
 
 
-log_prob = partial(log_prob_full, neg_log_prior=neg_log_prior, model_runner=model_runner, cost_calculator=cost_calculator)
+neg_log_likelihood_plus_prior = partial(neg_log_likelihood_plus_prior_full, neg_log_prior=neg_log_prior, model_runner=model_runner, cost_calculator=cost_calculator)
 ```
+
+### Proposal
+
+Next we need to decide how we want to sample the posterior. This is often the most important, and most difficult, choice in MCMC.
+
++++
 
 We're using the DIME proposal from [emcwrap](https://github.com/gboehl/emcwrap). This claims to have an adaptive proposal distribution so requires less fine tuning and is less sensitive to the starting point.
 
@@ -640,6 +655,10 @@ start_emcee = np.vstack(start_emcee).T
 
 move = DIMEMove()
 ```
+
+### Run
+
+Now we're ready to run our MCMC chain.
 
 ```{code-cell} ipython3
 # Use HDF5 backend, this saves things to disk and lets
@@ -707,7 +726,7 @@ with Pool(processes=processes) as pool:
     sampler = emcee.EnsembleSampler(
         nwalkers,
         ndim,
-        log_prob,
+        neg_log_likelihood_plus_prior,
         moves=move,
         backend=backend,
         blobs_dtype=[("neg_log_prior", float), ("neg_log_likelihood", float)],
@@ -909,6 +928,10 @@ print(f"Converged? {autocorr_bits['converged']}")
 
 Sometimes, our model parameters are underconstrained. For our toy example here, we can make this the case by adding the model's mass into the parameters to constrain. If we do this and run the MCMC again, we can see this degeneracy appear. Such a degeneracy would also cause issues for our optimisation, as equally good fits could be found with different parameter values. This is something to keep in mind and is a good reason to run MCMC after optimisation (i.e. the MCMC should be run as a check because it will reveal degeneracy that optimisation alone will not).
 
++++
+
+### Setup
+
 ```{code-cell} ipython3
 truth_incl_mass = {
     "k": UREG.Quantity(3000, "kg / s^2"),
@@ -996,8 +1019,8 @@ display(bounds_dict_incl_mass)
 bounds_incl_mass = [[v.to(unit).m for v in bounds_dict_incl_mass[k]] for k, unit in parameters_incl_mass]
 neg_log_prior_incl_mass = partial(neg_log_prior_bounds, bounds=np.array(bounds_incl_mass))
 
-log_prob_incl_mass = partial(
-    log_prob_full, 
+neg_log_likelihood_plus_prior_incl_mass = partial(
+    neg_log_likelihood_plus_prior_full, 
     neg_log_prior=neg_log_prior_incl_mass, 
     model_runner=model_runner_incl_mass, 
     cost_calculator=cost_calculator,
@@ -1019,6 +1042,8 @@ filename_incl_mass = "basic-demo-mcmc_incl-mass.h5"
 backend_incl_mass = emcee.backends.HDFBackend(filename_incl_mass)
 backend_incl_mass.reset(nwalkers_incl_mass, ndim_incl_mass)
 ```
+
+### Re-running the MCMC
 
 ```{code-cell} ipython3
 processes = 4
@@ -1066,7 +1091,7 @@ with Pool(processes=processes) as pool:
     sampler = emcee.EnsembleSampler(
         nwalkers_incl_mass,
         ndim_incl_mass,
-        log_prob_incl_mass,
+        neg_log_likelihood_plus_prior_incl_mass,
         moves=move_incl_mass,
         backend=backend_incl_mass,
         blobs_dtype=[("neg_log_prior", float), ("neg_log_likelihood", float)],
