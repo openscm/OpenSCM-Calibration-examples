@@ -1,3 +1,12 @@
+# Builds
+_build/
+
+# Notebooks
+*.ipynb
+
+# Output files
+*.h5
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
