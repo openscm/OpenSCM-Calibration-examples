@@ -1,16 +1,13 @@
-name: tests
+name: deploy
 
 on:
-  pull_request:
+  push:
     branches:
-      - main
-  schedule:
-    # Run cron job every month, https://crontab.guru/every-month
-    - cron: '0 0 * * 3'
-  workflow_dispatch:
+    - master
+
 
 jobs:
-  test-build:
+  deploy:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -44,10 +41,6 @@ jobs:
           poetry config virtualenvs.create true
           poetry config virtualenvs.in-project true
           poetry install --no-interaction
-      - name: Check notebook formatting
-        run: |
-          poetry run blacken-docs --check book/notebooks/*.md
-      # Also tests the notebooks thanks to the assertions contained within them
       - name: Build book
         run: |
           poetry run jupyter-book build book
@@ -56,5 +49,5 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: book/_build/html
-          publish_branch: gh-pages-test
+          publish_branch: gh-pages
           enable_jekyll: false
