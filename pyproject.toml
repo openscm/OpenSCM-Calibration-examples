@@ -15,7 +15,8 @@ jupyter-book = "^0.15.1"
 jupytext = "^1.14.5"
 
 [tool.poetry.group.dev.dependencies]
-blacken-docs = { git = "https://github.com/znicholls/blacken-docs.git", rev = "8dd86f" }
+# Waiting on https://github.com/adamchainz/blacken-docs/issues/240
+blacken-docs = { git = "https://github.com/znicholls/blacken-docs.git", rev = "27c1f12" }
 tokenize-rt = "^5.0.0"
 commitizen = "^3.1.1"
 

@@ -21,7 +21,7 @@ help:  ## print short description of each target
 
 .PHONY: checks
 checks:  ## run all the linting checks of the codebase
-	@echo "=== black docs ==="; poetry run blacken-docs --check book/notebooks/*.md || echo "--- black docs failed ---" >&2; \
+	@echo "=== black docs ==="; poetry run blacken-docs book/notebooks/*.md || echo "--- black docs failed ---" >&2; \
 		echo "======"
 
 .PHONY: docs
