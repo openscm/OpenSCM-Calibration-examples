@@ -46,7 +46,7 @@ jobs:
           poetry install --no-interaction
       - name: Check notebook formatting
         run: |
-          poetry run blacken-docs --check book/notebooks/*.md
+          poetry run blacken-docs book/notebooks/*.md
       # Also tests the notebooks thanks to the assertions contained within them
       - name: Build book
         run: |
